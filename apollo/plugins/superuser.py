@@ -47,7 +47,6 @@ class SuperUser(plugins.Plugin):
             '_': self.last_result,
         }
 
-        success = False
         env.update(globals())
         body = self.cleanup_code(body)
         stdout = buffer = io.StringIO()

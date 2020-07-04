@@ -117,42 +117,6 @@ class SuperUser(plugins.Plugin):
     async def execute_(self, context, *body):
         await self.execute(context=context, body=' '.join(body))
 
-    # @lightbulb.owner_only()
-    # @commands.command()
-    # async def exec(self, context: Context, *body):
-    #     if "import os" in body or "import sys" in body:
-    #         return await context.reply("For security reasons you can't do that!")
-    #     else:
-    #
-    #         body = ' '.join(body).strip('` ')
-    #
-    #         env = {'bot': context.bot, 'context': context, 'ctx': context, 'message': context.message,
-    #                '_': self.last_result}
-    #
-    #         env.update(globals())
-    #
-    #         func = f"async def body():\n{textwrap.indent(body, ' ')}"
-    #
-    #         exec(func, env)
-    #
-    #         body = env['body']
-    #
-    #         # noinspection PyBroadException
-    #         try:
-    #             await body()
-    #         except Exception:
-    #             msg = await context.reply(f'```{traceback.format_exc()}```')
-    #             await msg.add_reaction("\u274c")
-    #
-    #             def check(r):
-    #                 return r.user_id == context.author.id and r.message_id == msg.id
-    #
-    #             reaction = await context.bot.wait_for(message.MessageReactionAddEvent, timeout=30.0, predicate=check)
-    #
-    #             if reaction.emoji.name == "❌":
-    #                 await context.message.delete()
-    #                 await msg.delete()
-
 
 def load(bot):
     bot.add_plugin(SuperUser())

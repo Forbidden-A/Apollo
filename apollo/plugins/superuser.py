@@ -1,13 +1,10 @@
 import io
-import os
 import sys
 import textwrap
 import traceback
 from datetime import datetime
-
 import hikari
 import pytz
-from hikari.events import message
 from lightbulb import commands, plugins
 import lightbulb
 from lightbulb.context import Context

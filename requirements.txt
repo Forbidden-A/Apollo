@@ -1,2 +1,2 @@
-hikari~=2.0.0.dev27
+hikari~=2.0.0.dev29
 pytz~=2020.1

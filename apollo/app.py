@@ -1,5 +1,10 @@
+import os
+import traceback
 from datetime import datetime
-
+import asyncio
+import aiofile
+import json
+from aiofile import AIOFile
 import lightbulb
 import typing
 import pytz
@@ -22,3 +27,27 @@ class Bot(lightbulb.Bot):
     ], **kwargs):
         super().__init__(prefix=prefix, **kwargs)
         self.start_time = datetime.now(tz=pytz.timezone('UTC'))
+        self.token = self._token
+
+    def load_extensions(self):
+        for extension in os.listdir('plugins'):
+            try:
+                self.load_extension(f'plugins.{extension[:-3]}') if extension.endswith('.py') else print(extension, 'is not a python file.')
+            except lightbulb.errors.ExtensionMissingLoad:
+                print(extension, 'is missing load function.')
+            except lightbulb.errors.ExtensionError as e:
+                print(extension, 'Failed to load.')
+                print(' '.join(traceback.format_exception(type(e or e.__cause__), e or e.__cause__, e.__traceback__)))
+
+
+def main():
+    with open(r"../config.json", 'r') as fp:
+        config = json.loads(fp.read())
+    bot = Bot(prefix='a*', token=config.get('token'))
+    bot.load_extensions()
+    bot.run()
+
+
+if __name__ == '__main__':
+    exit(main())
+

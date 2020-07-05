@@ -33,7 +33,10 @@ class SuperUser(plugins.Plugin):
         return f'```py\n{error.text}{"^":>{error.offset}}\n{type(error).__name__}: {error}```'
 
     async def evaluate(self, context: Context, body):
-        """Honestly I don't even know who made this method 😭 but I'm guessing its neko @nekoka#8788 correct me in discord?"""
+        """
+        Honestly I don't even know who made this method 😭 but I'm guessing its neko @nekoka#8788 correct me in discord?
+        Update: According to dav neko made it
+        """
         start = datetime.now()
         match = re.search(r"```py(?:thon)?\n```", body)
         success = False

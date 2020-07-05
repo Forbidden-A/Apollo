@@ -56,10 +56,10 @@ class SuperUser(plugins.Plugin):
         try:
             exec(f'{func}', env)
         except SyntaxError as e:
-            lines = self.get_syntax_error(e).replace(context.bot.token, '~TOKEN~')
+            lines = self.get_syntax_error(e).replace(context.bot.token, '~TOKEN~').replace('`', '´')
             embed = hikari.Embed(
                 title=f"Executed in {(datetime.now() - start).total_seconds() * 1000:.2f}ms",
-                color=hikari.colors.Color.from_int(0xE74C3C),
+                color=hikari.Colour.from_int(0xE74C3C),
                 description=f"""```md
                                 # Python {sys.version}
                                 {lines}
@@ -76,10 +76,10 @@ class SuperUser(plugins.Plugin):
             success = False
             value = stdout.getvalue()
             for line in f"{value}{traceback.format_exc()}".splitlines():
-                output.append(line)
+                output.append(line.replace('`', '´'))
         else:
             success = True
-            value = buffer.getvalue().replace(context.bot.token, '~TOKEN~')
+            value = buffer.getvalue()
 
             try:
                 await context.message.add_reaction('\u2611')
@@ -89,15 +89,15 @@ class SuperUser(plugins.Plugin):
                 success = True
                 if value:
                     for line in value.splitlines():
-                        output.append(line.replace(context.bot.token, '~TOKEN~'))
+                        output.append(line)
             else:
                 self.last_result = ret
                 for line in f"{value}{ret}".splitlines():
-                    output.append(line.replace(context.bot.token, '~TOKEN~'))
+                    output.append(line)
         finally:
             sys.stdout = old_stdout
             buffer.close()
-        output = '\n'.join(output)
+        output = '\n'.join(output).replace(context.bot.token, '~TOKEN~').replace('`', '´')
 
         embed = hikari.Embed(
             title=f"Executed in {(datetime.now() - start).total_seconds() * 1000:.2f}ms",

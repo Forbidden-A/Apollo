@@ -1,13 +1,12 @@
 import contextlib
 import io
+import platform
 import re
-import sys
 import textwrap
 import traceback
 from datetime import datetime
 import hikari
 import lightbulb
-import pytz
 from lightbulb import commands, plugins
 from lightbulb.context import Context
 
@@ -37,7 +36,7 @@ class SuperUser(plugins.Plugin):
         Honestly I don't even know who made this method 😭 but I'm guessing its neko @nekoka#8788 correct me in discord?
         Update: According to dav neko made it
         """
-        start = datetime.now()
+        start = datetime.utcnow()
         match = re.search(r"```py(?:thon)?\n```", body)
         success = False
         if match:
@@ -79,13 +78,13 @@ class SuperUser(plugins.Plugin):
         stream.seek(0)
         lines = '\n'.join(stream.readlines()).replace(self.bot.token, '~TOKEN~').replace('`', '´')
         embed = hikari.Embed(
-            title=f"Executed in {(datetime.now() - start).total_seconds() * 1000:.2f}ms",
+            title=f"Executed in {(datetime.utcnow() - start).total_seconds() * 1000:.2f}ms",
             color=hikari.Colour.from_int(0x58EF92 if success else 0xE74C3C),
             description=
             (f"Result:```md\n"
-             f"# Python {sys.version} - Hikari {hikari.__version__} - lightbulb {lightbulb.__version__}\n"
+             f"# Python {platform.python_version()} - Hikari {hikari.__version__} - lightbulb {lightbulb.__version__}\n"
              f"{lines}```")
-            , timestamp=datetime.now(tz=pytz.timezone('UTC'))
+            , timestamp=datetime.utcnow()
         ).set_footer(text=f'Requested by {context.message.author.username}',
                      icon=str(context.message.author.avatar.url))
         await context.message.reply(embed=embed)

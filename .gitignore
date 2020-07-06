@@ -2,3 +2,6 @@ venv/
 .gitignore
 .idea/
 config.json
+venv9/
+apollo/plugins/__pycache__/
+apollo/__pycache__/

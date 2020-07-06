@@ -1,23 +1,42 @@
 import platform
-from datetime import datetime as dt
-import datetime
-
+from datetime import datetime
+import aiohttp
+import hikari.events.guild
 import lightbulb
-import pytz
 from lightbulb import plugins, commands
 from lightbulb.context import Context
-import hikari.events.guild
 
 
 class Info(plugins.Plugin):
-    def __init__(self):
+    def __init__(self, bot):
         super().__init__()
+        self.bot = bot
+
+    @staticmethod
+    def display_time(seconds, granularity=2):
+        result = []
+        intervals = (
+            ('weeks', 604800),  # 60 * 60 * 24 * 7
+            ('days', 86400),  # 60 * 60 * 24
+            ('hours', 3600),  # 60 * 60
+            ('minutes', 60),
+            ('seconds', 1),
+        )
+
+        for name, count in intervals:
+            value = seconds // count
+            if value:
+                seconds -= value * count
+                if value == 1:
+                    name = name.rstrip('s')
+                result.append("{} {}".format(int(value), name))
+        return ', '.join(result[:granularity])
 
     @commands.command()
     async def bot(self, context: Context):
         """Credits to Yoda#9999"""
-        uptime = int(round((dt.now(tz=pytz.timezone('UTC')) - context.bot.start_time).total_seconds()))
-        text = str(datetime.timedelta(seconds=uptime))
+        diff = datetime.utcnow() - self.bot.start_time
+        uptime = self.display_time(diff.total_seconds())
 
         embed = hikari.Embed(
             color=hikari.Colour.from_int(0x3498DB),
@@ -30,15 +49,16 @@ class Info(plugins.Plugin):
                 "[Lightbulb](https://tandemdude.gitlab.io/lightbulb/)\n"
                 "[Lightbulb Docs](https://tandemdude.gitlab.io/lightbulb/)\n"
                 "[Apollo](https://gitlab.com/Forbidden-A/apollo)"
-                ),
-            timestamp=dt.now(tz=pytz.timezone('UTC'))
+            ),
+            timestamp=datetime.utcnow()
         )
         embed.add_field(name="Hikari Version", value=hikari.__version__, inline=False)
+        embed.add_field(name='Aiohttp Version', value=aiohttp.__version__, inline=False)
         embed.add_field(name="Lightbulb Version", value=lightbulb.__version__, inline=False)
         embed.add_field(name="Python Version", value=platform.python_version(), inline=False)
-        embed.add_field(name="Uptime", value=text, inline=False)
+        embed.add_field(name="Uptime", value=uptime, inline=False)
         await context.reply(embed=embed)
 
 
 def load(bot):
-    bot.add_plugin(Info())
+    bot.add_plugin(Info(bot))

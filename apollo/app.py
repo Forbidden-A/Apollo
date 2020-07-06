@@ -4,7 +4,6 @@ import traceback
 import typing
 from datetime import datetime
 import lightbulb
-import pytz
 from hikari.models import messages
 from lightbulb.command_handler import BotWithHandler
 
@@ -21,15 +20,17 @@ class Bot(lightbulb.Bot):
                 typing.Coroutine[None, typing.Any, typing.Iterable[str]],
             ],
         ],
-    ], **kwargs):
-        super().__init__(prefix=prefix, **kwargs)
-        self.start_time = datetime.now(tz=pytz.timezone('UTC'))
+    ], insensitive_commands: bool = False,
+                 **kwargs):
+        super().__init__(prefix=prefix, insensitive_commands=insensitive_commands, **kwargs)
+        self.start_time = datetime.utcnow()
         self.token = self._token
 
     def load_extensions(self):
         for extension in os.listdir('plugins'):
             try:
-                self.load_extension(f'plugins.{extension[:-3]}') if extension.endswith('.py') else print(extension, 'is not a python file.')
+                self.load_extension(f'plugins.{extension[:-3]}') if extension.endswith('.py') else print(extension,
+                                                                                                         'is not a python file.')
             except lightbulb.errors.ExtensionMissingLoad:
                 print(extension, 'is missing load function.')
             except lightbulb.errors.ExtensionError as e:
@@ -40,11 +41,10 @@ class Bot(lightbulb.Bot):
 def main():
     with open(r"../config.json", 'r') as fp:
         config = json.loads(fp.read())
-    bot = Bot(prefix='a*', token=config.get('token'))
+    bot = Bot(prefix=['a*', ], token=config.get('token'), insensitive_commands=True)
     bot.load_extensions()
     bot.run()
 
 
 if __name__ == '__main__':
     exit(main())
-

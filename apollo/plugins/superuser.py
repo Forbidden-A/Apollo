@@ -29,8 +29,8 @@ class SuperUser(plugins.Plugin):
     def get_syntax_error(error: SyntaxError) -> str:
         """return syntax error string from error"""
         if error.text is None:
-            return f'```py\n{error.__class__.__name__}: {error}\n```'
-        return f'```py\n{error.text}{"^":>{error.offset}}\n{type(error).__name__}: {error}```'
+            return f'{error.__class__.__name__}: {error}\n'
+        return f'{error.text}{"^":>{error.offset}}\n{type(error).__name__}: {error}'
 
     async def evaluate(self, context: Context, body):
         """

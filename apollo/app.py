@@ -1,4 +1,3 @@
-import json
 import os
 import traceback
 import typing
@@ -39,11 +38,13 @@ class Bot(lightbulb.Bot):
 
 
 def main():
-    with open(r"../config.json", 'r') as fp:
-        config = json.loads(fp.read())
-    bot = Bot(prefix=['a*', ], token=config.get('token'), insensitive_commands=True)
-    bot.load_extensions()
-    bot.run()
+    if token := os.getenv('APOLLO_TOKEN'):
+        print(token, type(token))
+        bot = Bot(prefix=['a*', ], token=token, insensitive_commands=True)
+        bot.load_extensions()
+        bot.run()
+    else:
+        print("Please set an environment variable called `APOLLO_TOKEN` and set its value as the bot's token.")
 
 
 if __name__ == '__main__':

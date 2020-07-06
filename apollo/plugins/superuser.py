@@ -44,7 +44,6 @@ class SuperUser(plugins.Plugin):
         else:
             body = self.cleanup_code(body)
         body = "async def __invoke__(bot, context):\n" + textwrap.indent(body, " " * 4)
-
         stack = contextlib.ExitStack()
         stream = io.StringIO()
         stack.enter_context(contextlib.redirect_stdout(stream))
@@ -71,7 +70,6 @@ class SuperUser(plugins.Plugin):
             except SyntaxError as ex:
                 stream.write(self.get_syntax_error(ex))
             except Exception as ex:
-                stream.write("\n")
                 stream.write("".join(traceback.format_exception(type(ex), ex, ex.__traceback__)))
             else:
                 success = True
@@ -90,7 +88,7 @@ class SuperUser(plugins.Plugin):
         await context.message.reply(embed=embed)
 
     @lightbulb.owner_only()
-    @commands.command(name='execute', aliases=['exec', 'ex', 'do'])
+    @commands.command(name='execute', aliases=['exec', 'ex', 'do', 'eval', 'evaluate'])
     async def execute_(self, context, *body):
         await self.evaluate(context=context, body=' '.join(body))
 

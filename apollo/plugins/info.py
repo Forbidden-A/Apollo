@@ -29,10 +29,14 @@ class Info(plugins.Plugin):
                 seconds -= value * count
                 if value == 1:
                     name = name.rstrip('s')
-                result.append("{} {}".format(int(value), name))
+                result.append(f"{int(value)} {name}")
         return ', '.join(result[:granularity])
 
-    @commands.command()
+    @commands.group()
+    async def info(self, context: Context):
+        return
+
+    @info.command()
     async def bot(self, context: Context):
         """Credits to Yoda#9999"""
         diff = datetime.utcnow() - self.bot.start_time

@@ -1,5 +1,5 @@
 import platform
-from datetime import datetime
+from datetime import datetime, timezone
 import aiohttp
 import hikari.events.guild
 import lightbulb
@@ -54,7 +54,7 @@ class Info(plugins.Plugin):
                 "[Lightbulb Docs](https://tandemdude.gitlab.io/lightbulb/)\n"
                 "[Apollo](https://gitlab.com/Forbidden-A/apollo)"
             ),
-            timestamp=datetime.utcnow()
+            timestamp=datetime.now(tz=timezone.utc)
         )
         embed.add_field(name="Hikari Version", value=hikari.__version__, inline=False)
         embed.add_field(name='Aiohttp Version', value=aiohttp.__version__, inline=False)

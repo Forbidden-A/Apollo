@@ -1,5 +1,5 @@
 import random
-from datetime import datetime
+from datetime import datetime, timezone
 import hikari
 from lightbulb import plugins, commands
 from lightbulb.context import Context
@@ -26,13 +26,14 @@ class Fun(plugins.Plugin):
         except ValueError:
             await context.reply(
                 embed=hikari.Embed(description=f'I choose {random.randint(1, 6)}', color=0x3498DB,
-                                   timestamp=datetime.utcnow()).set_footer(icon=context.author.avatar, text='😀 btw ur numbers were bad')
+                                   timestamp=datetime.now(tz=timezone.utc)).set_footer(icon=context.author.avatar,
+                                                                                       text='😀 btw ur numbers were bad')
             )
             return
         await context.reply(
             embed=hikari.Embed(description=f'I choose {random.randint(first, last)}', color=0x3498DB,
-                               timestamp=datetime.utcnow()).set_footer(icon=context.author.avatar,
-                                                                       text='😀')
+                               timestamp=datetime.now(tz=timezone.utc)).set_footer(icon=context.author.avatar,
+                                                                                   text='😀')
         )
 
     @commands.command()
@@ -41,7 +42,6 @@ class Fun(plugins.Plugin):
         text = text[::-1]
         await context.message.delete()
         await context.reply(text)
-
 
 
 def load(bot):

@@ -4,7 +4,7 @@ import platform
 import re
 import textwrap
 import traceback
-from datetime import datetime
+from datetime import datetime, timezone
 import hikari
 import lightbulb
 from lightbulb import commands, plugins
@@ -18,13 +18,6 @@ class SuperUser(plugins.Plugin):
         self.bot = bot
 
     @staticmethod
-    def cleanup_code(content: str) -> str:
-        """get code from code blocks"""
-        if content.startswith('```') and content.endswith('```'):
-            return '\n'.join(content.split('\n')[1:(- 1)])
-        return content.strip('` \n')
-
-    @staticmethod
     def get_syntax_error(error: SyntaxError) -> str:
         """return syntax error string from error"""
         if error.text is None:
@@ -36,13 +29,11 @@ class SuperUser(plugins.Plugin):
         Honestly I don't even know who made this method 😭 but I'm guessing its neko @nekoka#8788 correct me in discord?
         Update: According to dav neko made it
         """
-        start = datetime.utcnow()
+        start = datetime.now(tz=timezone.utc)
         match = re.search(r"```py(?:thon)?\n```", body)
         success = False
         if match:
             body = match.group(1)
-        else:
-            body = self.cleanup_code(body)
         body = "async def __invoke__(bot, context):\n" + textwrap.indent(body, " " * 4)
         stack = contextlib.ExitStack()
         stream = io.StringIO()
@@ -76,21 +67,23 @@ class SuperUser(plugins.Plugin):
         stream.seek(0)
         lines = '\n'.join(stream.readlines()).replace(self.bot.token, '~TOKEN~').replace('`', '´')
         embed = hikari.Embed(
-            title=f"Executed in {(datetime.utcnow() - start).total_seconds() * 1000:.2f}ms",
+            title=f"Executed in {(datetime.now(tz=timezone.utc) - start).total_seconds() * 1000:.2f}ms",
             color=hikari.Colour.from_int(0x58EF92 if success else 0xE74C3C),
             description=
-            (f"Result:```md\n"
-             f"# Python {platform.python_version()} - Hikari {hikari.__version__} - lightbulb {lightbulb.__version__}\n"
-             f"{lines}```")
-            , timestamp=datetime.utcnow()
+            (
+                f"Result:```md\n"
+                f"# Python {platform.python_version()} - Hikari {hikari.__version__} - lightbulb {lightbulb.__version__}\n"
+                f"{lines}```")
+            , timestamp=datetime.now(tz=timezone.utc)
         ).set_footer(text=f'Requested by {context.message.author.username}',
                      icon=str(context.message.author.avatar.url))
         await context.message.reply(embed=embed)
 
+    # noinspection PyUnusedLocal
     @lightbulb.owner_only()
-    @commands.command(name='execute', aliases=['exec', 'ex', 'do', 'eval', 'evaluate'])
-    async def execute_(self, context, *body):
-        await self.evaluate(context=context, body=' '.join(body))
+    @commands.command(aliases=['exec', 'e', 'run', 'eval', 'evaluate'])
+    async def execute(self, context: Context, *, body):
+        await self.evaluate(context=context, body=context.message.content.strip(f'{context.prefix}{context.invoked_with}'))
 
 
 def load(bot):

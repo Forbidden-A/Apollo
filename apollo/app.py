@@ -1,13 +1,25 @@
+import logging
 import os
 import traceback
 import typing
 from datetime import datetime
+
+import hikari
 import lightbulb
 from hikari.models import messages
 from lightbulb.command_handler import BotWithHandler
 
 
 class Bot(lightbulb.Bot):
+
+    FORFEIT = '\N{no entry sign}'
+    FORWARD = '\N{black rightwards arrow}'
+    BACKWARD = '\N{leftwards black arrow}'
+    FAST_FORWARD = '\N{black right-pointing double triangle}'
+    REWIND = '\N{black left-pointing double triangle}'
+    MEMBER = '🙈'
+    VALID_REACTIONS = [FORFEIT, REWIND, BACKWARD, FORWARD, FAST_FORWARD, MEMBER]
+
     def __init__(self, *, prefix: typing.Union[
         typing.Iterable[str],
         typing.Callable[
@@ -39,8 +51,8 @@ class Bot(lightbulb.Bot):
 
 def main():
     if token := os.getenv('APOLLO_TOKEN'):
-        print(token, type(token))
         bot = Bot(prefix=['a*', ], token=token, insensitive_commands=True)
+        logging.getLogger('lightbulb').setLevel(logging.DEBUG)
         bot.load_extensions()
         bot.run()
     else:

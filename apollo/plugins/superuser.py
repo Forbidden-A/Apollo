@@ -88,7 +88,7 @@ class SuperUser(plugins.Plugin):
         def make_embed(index, content):
             return hikari.Embed(
                 title=f"Executed in {(datetime.now(tz=timezone.utc) - start).total_seconds() * 1000:.2f}ms",
-                color=hikari.Colour.from_int(0x58EF92 if success else 0xE74C3C),
+                color=0x58EF92 if success else 0xE74C3C,
                 description=f"`Page #{index + 1}` \nResult: {content}",
                 timestamp=datetime.now(tz=timezone.utc),
             ).set_footer(

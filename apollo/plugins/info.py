@@ -16,11 +16,11 @@ class Info(plugins.Plugin):
     def display_time(seconds, granularity=2):
         result = []
         intervals = (
-            ('weeks', 604800),  # 60 * 60 * 24 * 7
-            ('days', 86400),  # 60 * 60 * 24
-            ('hours', 3600),  # 60 * 60
-            ('minutes', 60),
-            ('seconds', 1),
+            ("weeks", 604800),  # 60 * 60 * 24 * 7
+            ("days", 86400),  # 60 * 60 * 24
+            ("hours", 3600),  # 60 * 60
+            ("minutes", 60),
+            ("seconds", 1),
         )
 
         for name, count in intervals:
@@ -28,9 +28,9 @@ class Info(plugins.Plugin):
             if value:
                 seconds -= value * count
                 if value == 1:
-                    name = name.rstrip('s')
+                    name = name.rstrip("s")
                 result.append(f"{int(value)} {name}")
-        return ', '.join(result[:granularity])
+        return ", ".join(result[:granularity])
 
     @commands.group()
     async def info(self, context: Context):
@@ -43,7 +43,7 @@ class Info(plugins.Plugin):
         uptime = self.display_time(diff.total_seconds())
 
         embed = hikari.Embed(
-            color=hikari.Colour.from_int(0x3498DB),
+            colour=0x3498DB,
             description=(
                 "Apollo is a discord bot made using [Hikari](https://nekokatt.gitlab.io/hikari/) and [Lightbulb](https://tandemdude.gitlab.io/lightbulb/)\n"
                 "[Hikari Discord](https://discord.com/invite/Jx4cNGG)\n"
@@ -52,14 +52,18 @@ class Info(plugins.Plugin):
                 "[Hikari PyPi](https://pypi.org/project/hikari/)\n"
                 "[Lightbulb](https://tandemdude.gitlab.io/lightbulb/)\n"
                 "[Lightbulb Docs](https://tandemdude.gitlab.io/lightbulb/)\n"
-                "[Apollo](https://gitlab.com/Forbidden-A/apollo)"
+                "[Apollo](https://github.com/Forbidden-A/apollo)"
             ),
-            timestamp=datetime.now(tz=timezone.utc)
+            timestamp=datetime.now(tz=timezone.utc),
         )
         embed.add_field(name="Hikari Version", value=hikari.__version__, inline=False)
-        embed.add_field(name='Aiohttp Version', value=aiohttp.__version__, inline=False)
-        embed.add_field(name="Lightbulb Version", value=lightbulb.__version__, inline=False)
-        embed.add_field(name="Python Version", value=platform.python_version(), inline=False)
+        embed.add_field(name="Aiohttp Version", value=aiohttp.__version__, inline=False)
+        embed.add_field(
+            name="Lightbulb Version", value=lightbulb.__version__, inline=False
+        )
+        embed.add_field(
+            name="Python Version", value=platform.python_version(), inline=False
+        )
         embed.add_field(name="Uptime", value=uptime, inline=False)
         await context.reply(embed=embed)
 

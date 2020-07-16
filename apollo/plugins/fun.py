@@ -14,8 +14,12 @@ class Fun(plugins.Plugin):
     async def echo(self, context: Context, *text):
         await context.message.delete()
         try:
-            await context.message.reply(' '.join(text), mentions_everyone=False, user_mentions=False,
-                                        role_mentions=False)
+            await context.message.reply(
+                " ".join(text),
+                mentions_everyone=False,
+                user_mentions=False,
+                role_mentions=False,
+            )
         except (hikari.NotFound, hikari.Forbidden):
             pass
 
@@ -25,20 +29,26 @@ class Fun(plugins.Plugin):
             first, last = int(first), int(last)
         except ValueError:
             await context.reply(
-                embed=hikari.Embed(description=f'I choose {random.randint(1, 6)}', color=0x3498DB,
-                                   timestamp=datetime.now(tz=timezone.utc)).set_footer(icon=context.author.avatar,
-                                                                                       text='😀 btw ur numbers were bad')
+                embed=hikari.Embed(
+                    description=f"I choose {random.randint(1, 6)}",
+                    colour=0x3498DB,
+                    timestamp=datetime.now(tz=timezone.utc),
+                ).set_footer(
+                    icon=context.author.avatar, text="😀 btw ur numbers were bad"
+                )
             )
             return
         await context.reply(
-            embed=hikari.Embed(description=f'I choose {random.randint(first, last)}', color=0x3498DB,
-                               timestamp=datetime.now(tz=timezone.utc)).set_footer(icon=context.author.avatar,
-                                                                                   text='😀')
+            embed=hikari.Embed(
+                description=f"I choose {random.randint(first, last)}",
+                colour=0x3498DB,
+                timestamp=datetime.now(tz=timezone.utc),
+            ).set_footer(icon=context.author.avatar, text="😀")
         )
 
     @commands.command()
     async def reverse(self, context: Context, *text):
-        text = ' '.join(text)
+        text = " ".join(text)
         text = text[::-1]
         await context.message.delete()
         await context.reply(text)

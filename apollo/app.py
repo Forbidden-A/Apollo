@@ -1,17 +1,20 @@
+import inspect
 import logging
 import os
 import traceback
 import typing
-from datetime import datetime
+from datetime import datetime, timezone
 
 import hikari
 import lightbulb
+from hikari.impl.rest import client
 from hikari.models import messages
 from lightbulb.command_handler import BotWithHandler
 
+client.RESTClientImpl = type("REST", (client.RESTClientImpl,), {})  # unslot
+
 
 class Bot(lightbulb.Bot):
-
     FORFEIT = '\N{no entry sign}'
     FORWARD = '\N{black rightwards arrow}'
     BACKWARD = '\N{leftwards black arrow}'
@@ -34,8 +37,9 @@ class Bot(lightbulb.Bot):
     ], insensitive_commands: bool = False,
                  **kwargs):
         super().__init__(prefix=prefix, insensitive_commands=insensitive_commands, **kwargs)
-        self.start_time = datetime.utcnow()
+        self.start_time = datetime.now(tz=timezone.utc)
         self.token = self._token
+        self.send = self.rest.create_message
 
     def load_extensions(self):
         for extension in os.listdir('plugins'):

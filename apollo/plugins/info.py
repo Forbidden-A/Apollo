@@ -39,7 +39,7 @@ class Info(plugins.Plugin):
     @info.command()
     async def bot(self, context: Context):
         """Credits to Yoda#9999"""
-        diff = datetime.utcnow() - self.bot.start_time
+        diff = datetime.now(tz=timezone.utc) - self.bot.start_time
         uptime = self.display_time(diff.total_seconds())
 
         embed = hikari.Embed(

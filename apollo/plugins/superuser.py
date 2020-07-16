@@ -23,7 +23,7 @@ class SuperUser(plugins.Plugin):
     def get_syntax_error(error: SyntaxError) -> str:
         """return syntax error string from error"""
         if error.text is None:
-            return f'{error.__class__.__name__}: {error}\n'
+            return f"{error.__class__.__name__}: {error}\n"
         return f'{error.text}{"^":>{error.offset}}\n{type(error).__name__}: {error}'
 
     async def evaluate(self, context: Context, body):
@@ -49,15 +49,15 @@ class SuperUser(plugins.Plugin):
         with stack:
             try:
                 env = {
-                    'self': self,
-                    'bot': context.bot,
-                    'context': context,
-                    'ctx': context,
-                    'channel_id': context.channel_id,
-                    'author': context.author,
-                    'guild_id': context.guild_id,
-                    'message': context.message,
-                    '_': self.last_result,
+                    "self": self,
+                    "bot": context.bot,
+                    "context": context,
+                    "ctx": context,
+                    "channel_id": context.channel_id,
+                    "author": context.author,
+                    "guild_id": context.guild_id,
+                    "message": context.message,
+                    "_": self.last_result,
                 }
                 env.update(globals())
                 env.update(locals())
@@ -67,26 +67,34 @@ class SuperUser(plugins.Plugin):
             except SyntaxError as ex:
                 stream.write(self.get_syntax_error(ex))
             except Exception as ex:
-                stream.write("".join(traceback.format_exception(type(ex), ex, ex.__traceback__)))
+                stream.write(
+                    "".join(traceback.format_exception(type(ex), ex, ex.__traceback__))
+                )
             else:
                 success = True
         stream.seek(0)
-        lines = '\n'.join(stream.readlines()).replace(self.bot.token, '~TOKEN~').replace('`', '´')
+        lines = (
+            "\n".join(stream.readlines())
+            .replace(self.bot.token, "~TOKEN~")
+            .replace("`", "´")
+        )
         desc = (
             f"# Python {platform.python_version()} - Hikari {hikari.__version__} - lightbulb {lightbulb.__version__}\n"
             f"{lines}"
         )
-        paginator = pag.EmbedPaginator(max_lines=25, prefix=f'```md', suffix='```')
+        paginator = pag.EmbedPaginator(max_lines=25, prefix="```md", suffix="```")
 
         @paginator.embed_factory()
         def make_embed(index, content):
             return hikari.Embed(
                 title=f"Executed in {(datetime.now(tz=timezone.utc) - start).total_seconds() * 1000:.2f}ms",
                 color=hikari.Colour.from_int(0x58EF92 if success else 0xE74C3C),
-                description=f"`#{index + 1}` \nResult: {content}"
-                , timestamp=datetime.now(tz=timezone.utc)
-            ).set_footer(text=f'Requested by {context.message.author.username}',
-                         icon=str(context.message.author.avatar.url))
+                description=f"`Page #{index + 1}` \nResult: {content}",
+                timestamp=datetime.now(tz=timezone.utc),
+            ).set_footer(
+                text=f"Requested by {context.message.author.username}",
+                icon=str(context.message.author.avatar.url),
+            )
 
         for line in desc.splitlines():
             paginator.add_line(line)
@@ -96,7 +104,7 @@ class SuperUser(plugins.Plugin):
 
     # noinspection PyUnusedLocal,PyProtectedMember
     @lightbulb.owner_only()
-    @commands.command(aliases=['exec', 'e', 'run', 'eval', 'evaluate'])
+    @commands.command(aliases=["exec", "e", "run", "eval", "evaluate"])
     async def execute(self, ctx: Context, *, body):
         sent = []
 
@@ -110,19 +118,30 @@ class SuperUser(plugins.Plugin):
         async def check(event):
             return event.message.id == ctx.message.id
 
-        await self.evaluate(context=ctx,
-                            body=ctx.message.content.strip(f'{ctx.prefix}{ctx.invoked_with}'))
+        await self.evaluate(
+            context=ctx,
+            body=ctx.message.content.strip(f"{ctx.prefix}{ctx.invoked_with}"),
+        )
         try:
-            message_event = await ctx.bot.wait_for(hikari.events.MessageUpdateEvent, timeout=60.0, predicate=check)
+            message_event = await ctx.bot.wait_for(
+                hikari.events.MessageUpdateEvent, timeout=60.0, predicate=check
+            )
             if message_event.message.content != ctx.message.content:
-                new_message = await self.bot.rest.fetch_message(await self.bot.rest.fetch_channel(message_event.message.channel_id), message_event.message.id)
+                new_message = await self.bot.rest.fetch_message(
+                    await self.bot.rest.fetch_channel(message_event.message.channel_id),
+                    message_event.message.id,
+                )
                 command_context = Context(
                     self.bot, new_message, ctx.prefix, ctx.invoked_with, ctx.command
                 )
-                command_args = self.bot.resolve_arguments(message_event.message, ctx.prefix)[1:]
+                command_args = self.bot.resolve_arguments(
+                    message_event.message, ctx.prefix
+                )[1:]
                 for message in sent:
                     await message.delete()
-                await self.bot._invoke_command(ctx.command, command_context, command_args)
+                await self.bot._invoke_command(
+                    ctx.command, command_context, command_args
+                )
             else:
                 pass
         except (hikari.Forbidden, hikari.NotFound):

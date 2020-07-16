@@ -58,6 +58,9 @@ class Bot(lightbulb.Bot):
 
 
 def main():
+    # Set path to bot directory
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    os.chdir(dir_path)
     if token := os.getenv("APOLLO_TOKEN"):
         bot = Bot(prefix=["a*",], token=token, insensitive_commands=True)
         logging.getLogger("lightbulb").setLevel(logging.DEBUG)

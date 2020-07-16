@@ -1,5 +1,8 @@
+import html
 import random
 from datetime import datetime, timezone
+
+import aiohttp
 import hikari
 from lightbulb import plugins, commands
 from lightbulb.context import Context
@@ -22,6 +25,28 @@ class Fun(plugins.Plugin):
             )
         except (hikari.NotFound, hikari.Forbidden):
             pass
+
+    @commands.command()
+    async def meme(self, ctx):
+        async with aiohttp.request(
+            "get", "https://www.reddit.com/r/dankmemes/.json"
+        ) as resp:
+            json = await resp.json()
+            children = json["data"]["children"]
+            try:
+                post = random.choice(children)
+                data = post["data"]
+                embed = hikari.Embed(
+                    title=data["title"],
+                    url=f"https://www.reddit.com{data['permalink']}",
+                    colour=random.randint(0, 0xFFFFFF),
+                )
+                embed.set_image(
+                    html.unescape(str(data["preview"]["images"][0]["source"]["url"]))
+                )
+                await ctx.reply(embed=embed)
+            except (KeyError, IndexError):
+                await ctx.reply("you")
 
     @commands.command()
     async def roll(self, context: Context, first: int = 1, last: int = 6):

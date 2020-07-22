@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 
 import aiohttp
 import hikari
-from lightbulb import plugins, commands
+from lightbulb import plugins, commands, cooldowns
 from lightbulb.context import Context
 
 
@@ -26,6 +26,7 @@ class Fun(plugins.Plugin):
         except (hikari.NotFound, hikari.Forbidden):
             pass
 
+    @cooldowns.cooldown(length=30, usages=1, bucket=cooldowns.UserBucket)
     @commands.command()
     async def meme(self, ctx):
         async with aiohttp.request(

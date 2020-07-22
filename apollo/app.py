@@ -1,39 +1,16 @@
-import logging
 import os
 import traceback
-import typing
 from datetime import datetime, timezone
-
 import lightbulb
-from hikari.impl.rest import client
-from hikari.models import messages
-from lightbulb.command_handler import BotWithHandler
+from hikari.impl import rest
+from hikari.impl.rest import RESTClientImpl
 
-client.RESTClientImpl = type("REST", (client.RESTClientImpl,), {})  # unslot
+rest.RESTClientImpl = type("REST", (RESTClientImpl,), {})  # unslot
 
 
 class Bot(lightbulb.Bot):
-    def __init__(
-        self,
-        *,
-        prefix: typing.Union[
-            typing.Iterable[str],
-            typing.Callable[
-                [BotWithHandler, messages.Message],
-                typing.Union[
-                    typing.Callable[
-                        [BotWithHandler, messages.Message], typing.Iterable[str],
-                    ],
-                    typing.Coroutine[None, typing.Any, typing.Iterable[str]],
-                ],
-            ],
-        ],
-        insensitive_commands: bool = False,
-        **kwargs,
-    ):
-        super().__init__(
-            prefix=prefix, insensitive_commands=insensitive_commands, **kwargs
-        )
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.start_time = datetime.now(tz=timezone.utc)
         self.token = self._token
         self.send = self.rest.create_message
@@ -46,6 +23,8 @@ class Bot(lightbulb.Bot):
                 ) else print(extension, "is not a python file.")
             except lightbulb.errors.ExtensionMissingLoad:
                 print(extension, "is missing load function.")
+            except lightbulb.errors.ExtensionAlreadyLoaded:
+                pass
             except lightbulb.errors.ExtensionError as e:
                 print(extension, "Failed to load.")
                 print(
@@ -63,12 +42,11 @@ def main():
     os.chdir(dir_path)
     if token := os.getenv("APOLLO_TOKEN"):
         bot = Bot(prefix=["a*",], token=token, insensitive_commands=True)
-        logging.getLogger("lightbulb").setLevel(logging.DEBUG)
         bot.load_extensions()
         bot.run()
     else:
         print(
-            "Please set an environment variable called `APOLLO_TOKEN` and set its value as the bot's token."
+            "Please set an environment variable called `APOLLO_TOKEN` and set its value to the bot's token."
         )
 
 

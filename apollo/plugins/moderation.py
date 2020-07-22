@@ -1,11 +1,13 @@
 from datetime import timezone, datetime
 from random import randint
+
 import hikari
+from PIL import Image
 from lightbulb import plugins, commands, cooldowns, converters, checks, Bot
 from lightbulb.context import Context
 
 
-class Information(plugins.Plugin):
+class Inspect(plugins.Plugin):
     def __init__(self, bot: Bot):
         super().__init__()
         self.bot = bot
@@ -285,6 +287,44 @@ class Information(plugins.Plugin):
         )
         await context.reply(embed=embed)
 
+    @checks.guild_only()
+    @cooldowns.cooldown(length=30, usages=3, bucket=cooldowns.UserBucket)
+    @inspect.command(aliases=["color", "co"])
+    async def colour(self, context: Context, *, colour: str):
+        c = str(randint(0x0, 0xFFFFFF)) if colour == "0" else colour
+        try:
+            if len(c.split(" ")) == 3:
+                red, green, blue = [int(c) for c in c.split(" ")]
+                colour: hikari.Colour = hikari.Colour.from_rgb(red, green, blue)
+            elif len(c.split(" ")) == 1:
+                colour: hikari.Colour = hikari.Colour.from_int(
+                    int(c)
+                ) if c.isdigit() else hikari.Colour.from_hex_code(c)
+            else:
+                await context.reply(
+                    "Either enter 3 values representing rgb or 1 colour hex/decimal or 0 for a random colour"
+                )
+                return
+        except ValueError:
+            return await context.reply("Invalid colour.")
+        Image.new(mode="RGB", size=(128, 128), color=colour.rgb).save("colour.webp")
+        embed = (
+            hikari.Embed(
+                title="Inspect Colour",
+                description=f"**Decimal:** `{int(colour)}`\n"
+                f"**Hex:** `#{colour.raw_hex_code}`\n"
+                f"**Rgb:** `{', '.join([str(v) for v in colour.rgb])}`",
+                colour=colour,
+                timestamp=datetime.now(timezone.utc),
+            )
+            .set_footer(
+                text=f"Requested by {context.member.nickname or context.member.username if context.member else context.author.username}",
+                icon=context.author.avatar,
+            )
+            .set_thumbnail(hikari.File("colour.webp"))
+        )
+        await context.reply(embed=embed)
+
 
 def load(bot):
-    bot.add_plugin(Information(bot))
+    bot.add_plugin(Inspect(bot))

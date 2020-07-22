@@ -94,7 +94,7 @@ class Inspect(plugins.Plugin):
         )
         embed.set_thumbnail(member.avatar)
         embed.set_footer(
-            text=f"Requested by {context.member.nickname or context.member.name}",
+            text=f"Requested by {context.member.nickname or context.member.username}",
             icon=str(context.member.avatar),
         )
         await context.reply(embed=embed)
@@ -139,34 +139,37 @@ class Inspect(plugins.Plugin):
         created_at = f"{created_at.strftime(self.date_format)}. {self.display_time((now - created_at).total_seconds())} ago"
 
         owner = await self.bot.rest.fetch_user(guild.owner_id)
-        embed = hikari.Embed(
-            title="Inspect Guild",
-            colour=randint(0, 0xFFFFFF),
-            timestamp=now,
-            description=f"**Name:** `{guild.name}`\n"
-            f"**ID:** `{guild.id}`\n"
-            f"**Owner:** `{owner}`\n"
-            f"**Members:** `{len(guild.members)}`\n"
-            f"**• Humans:** `{len([member for member in guild.members if not member.is_bot])}`\n"
-            f"**• Bots:** `{len([member for member in guild.members if member.is_bot])}`\n"
-            f"**Roles:** `{len(guild.roles)}`\n"
-            f"**Emojis:** `{len(guild.emojis)}`\n"
-            f"**Created at:** `{created_at}`\n"
-            f"**Channels:** `{len(guild.channels)}`\n"
-            f"**• Categories:** `{len(list(filter(lambda channel: isinstance(channel, hikari.GuildCategory), guild.channels)))}`\n"
-            f"**• Text:** `{len(list(filter(lambda channel: isinstance(channel, hikari.GuildTextChannel), guild.channels)))}`\n"
-            f"**• Voice:** `{len(list(filter(lambda channel: isinstance(channel, hikari.GuildVoiceChannel), guild.channels)))}`\n"
-            f"**Region:** `{guild.region}`\n"
-            f"**AFK Channel:** {f'<#{guild.afk_channel_id}>' if guild.afk_channel_id else '`None`'}\n"
-            f"**AFK Timeout:** `{guild.afk_timeout}`\n"
-            f"**System Channel:** <#{guild.system_channel_id}>\n"
-            f"**Is Large:** `{'Yes' if guild.is_large else 'No'}`\n"
-            f"**MFA Enforced:** `{'Yes' if guild.mfa_level else 'No'}`\n"
-            f"**Verification Level:** `{guild.verification_level}`",
-        )
-        embed.set_footer(
-            text=f"Requested by {context.member.nickname or context.member.username}",
-            icon=context.member.avatar,
+        embed = (
+            hikari.Embed(
+                title="Inspect Guild",
+                colour=randint(0, 0xFFFFFF),
+                timestamp=now,
+                description=f"**Name:** `{guild.name}`\n"
+                f"**ID:** `{guild.id}`\n"
+                f"**Owner:** `{owner}`\n"
+                f"**Members:** `{len(guild.members)}`\n"
+                f"**• Humans:** `{len([member for member in guild.members if not member.is_bot])}`\n"
+                f"**• Bots:** `{len([member for member in guild.members if member.is_bot])}`\n"
+                f"**Roles:** `{len(guild.roles)}`\n"
+                f"**Emojis:** `{len(guild.emojis)}`\n"
+                f"**Created at:** `{created_at}`\n"
+                f"**Channels:** `{len(guild.channels)}`\n"
+                f"**• Categories:** `{len(list(filter(lambda channel: isinstance(channel, hikari.GuildCategory), guild.channels)))}`\n"
+                f"**• Text:** `{len(list(filter(lambda channel: isinstance(channel, hikari.GuildTextChannel), guild.channels)))}`\n"
+                f"**• Voice:** `{len(list(filter(lambda channel: isinstance(channel, hikari.GuildVoiceChannel), guild.channels)))}`\n"
+                f"**Region:** `{guild.region}`\n"
+                f"**AFK Channel:** {f'<#{guild.afk_channel_id}>' if guild.afk_channel_id else '`None`'}\n"
+                f"**AFK Timeout:** `{guild.afk_timeout}`\n"
+                f"**System Channel:** <#{guild.system_channel_id}>\n"
+                f"**Is Large:** `{'Yes' if guild.is_large else 'No'}`\n"
+                f"**MFA Enforced:** `{'Yes' if guild.mfa_level else 'No'}`\n"
+                f"**Verification Level:** `{guild.verification_level}`",
+            )
+            .set_footer(
+                text=f"Requested by {context.member.nickname or context.member.username}",
+                icon=context.member.avatar,
+            )
+            .set_thumbnail(guild.icon_url)
         )
         await context.reply(embed=embed)
 

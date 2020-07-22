@@ -53,10 +53,11 @@ class SuperUser(plugins.Plugin):
             .replace("`", "´")
         )
         desc = (
-            f"# Python {platform.python_version()} - Hikari {hikari.__version__} - lightbulb {lightbulb.__version__}\n"
+            f"*** Python {platform.python_version()} - Hikari {hikari.__version__} - lightbulb {lightbulb.__version__}\n"
             f"{lines}"
+            f"- Returned {process.returncode}"
         )
-        paginator = pag.EmbedPaginator(max_lines=25, prefix="```md", suffix="```")
+        paginator = pag.EmbedPaginator(max_lines=25, prefix="```diff", suffix="```")
 
         @paginator.embed_factory()
         def make_embed(index, content):
@@ -67,7 +68,7 @@ class SuperUser(plugins.Plugin):
                 timestamp=datetime.now(tz=timezone.utc),
             ).set_footer(
                 text=f"Requested by {context.message.author.username}",
-                icon=str(context.message.author.avatar.url),
+                icon=context.message.author.avatar,
             )
 
         for line in desc.splitlines():
@@ -111,7 +112,7 @@ class SuperUser(plugins.Plugin):
                 env.update(locals())
                 exec(body, env)
                 self.last_result = await env["__invoke__"](self.bot, context)
-                stream.write(f"Returned: {self.last_result!r}")
+                stream.write(f"- Returned: {self.last_result!r}")
             except SyntaxError as ex:
                 stream.write(self.get_syntax_error(ex))
             except Exception as ex:
@@ -127,10 +128,10 @@ class SuperUser(plugins.Plugin):
             .replace("`", "´")
         )
         desc = (
-            f"# Python {platform.python_version()} - Hikari {hikari.__version__} - lightbulb {lightbulb.__version__}\n"
+            f"*** Python {platform.python_version()} - Hikari {hikari.__version__} - lightbulb {lightbulb.__version__}\n"
             f"{lines}"
         )
-        paginator = pag.EmbedPaginator(max_lines=25, prefix="```md", suffix="```")
+        paginator = pag.EmbedPaginator(max_lines=25, prefix="```diff", suffix="```")
 
         @paginator.embed_factory()
         def make_embed(index, content):
@@ -141,7 +142,7 @@ class SuperUser(plugins.Plugin):
                 timestamp=datetime.now(tz=timezone.utc),
             ).set_footer(
                 text=f"Requested by {context.message.author.username}",
-                icon=str(context.message.author.avatar.url),
+                icon=context.message.author.avatar,
             )
 
         for line in desc.splitlines():

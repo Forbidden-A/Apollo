@@ -1,10 +1,8 @@
 from datetime import timezone, datetime
 from random import randint
 import hikari
-from lightbulb import plugins, commands, cooldowns, converters, checks
+from lightbulb import plugins, commands, cooldowns, converters, checks, Bot
 from lightbulb.context import Context
-
-from apollo.app import Bot
 
 
 class Information(plugins.Plugin):

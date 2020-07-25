@@ -6,6 +6,7 @@ import aiohttp
 import hikari
 from lightbulb import plugins, commands, cooldowns
 from lightbulb.context import Context
+from lightbulb.converters import user_converter
 
 
 class Fun(plugins.Plugin):
@@ -25,6 +26,21 @@ class Fun(plugins.Plugin):
             )
         except (hikari.NotFound, hikari.Forbidden):
             pass
+
+    @commands.command()
+    async def avatar(self, context, user: user_converter):
+        await context.reply(
+            embed=hikari.Embed(
+                title=f"{user.username}'s avatar",
+                colour=random.randint(0, 0xFFFFFF),
+                timestamp=datetime.now(timezone.utc),
+            )
+            .set_image(user.avatar)
+            .set_footer(
+                text=f"Requested by {context.member.nickname or context.member.username if context.member else context.author.username}",
+                icon=context.author.avatar,
+            )
+        )
 
     @cooldowns.cooldown(length=30, usages=1, bucket=cooldowns.UserBucket)
     @commands.command()
@@ -50,13 +66,13 @@ class Fun(plugins.Plugin):
                 await ctx.reply("you")
 
     @commands.command()
-    async def roll(self, context: Context, first: int = 1, last: int = 6):
+    async def roll(self, context: Context, first: float = 1, last: float = 6):
         try:
             first, last = int(first), int(last)
-        except ValueError:
+        except (ValueError, OverflowError):
             await context.reply(
                 embed=hikari.Embed(
-                    description=f"I choose {random.randint(1, 6)}",
+                    description=f"It's {random.randint(1, 6)}",
                     colour=0x3498DB,
                     timestamp=datetime.now(tz=timezone.utc),
                 ).set_footer(
@@ -66,7 +82,7 @@ class Fun(plugins.Plugin):
             return
         await context.reply(
             embed=hikari.Embed(
-                description=f"I choose {random.randint(first, last)}",
+                description=f"It's {random.randint(first, last)}",
                 colour=0x3498DB,
                 timestamp=datetime.now(tz=timezone.utc),
             ).set_footer(icon=context.author.avatar, text="😀")

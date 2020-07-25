@@ -78,7 +78,7 @@ class Inspect(plugins.Plugin):
             f"**Display Name:** `{member.nickname or member.username}`\n"
             f"**Nickname:** `{member.nickname}`\n"
             f"**Rank:** <@&{roles[0].id}>\n"
-            f"**• Colour:** `{str(roles[0].color).upper()}`\n",
+            f"**• Colour:** `{str(list(filter(lambda r: r.colour.hex_code != '#000000', roles))[0]).upper()}`\n",
             timestamp=now,
             colour=roles[0].color,
         )

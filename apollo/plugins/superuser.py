@@ -1,16 +1,21 @@
 import asyncio
 import contextlib
+import inspect
 import io
 import platform
 import re
+import sys
 import textwrap
 import traceback
 from datetime import datetime, timezone
+from random import randint
+import math
 import hikari
 import lightbulb
-from lightbulb import commands, plugins
+from lightbulb import commands, plugins, checks
 from lightbulb.context import Context
-from lightbulb.utils import pag, nav
+from lightbulb.utils import nav
+from lightbulb.utils.pag import EmbedPaginator
 
 
 class SuperUser(plugins.Plugin):
@@ -57,17 +62,20 @@ class SuperUser(plugins.Plugin):
             f"{lines}"
             f"- Returned {process.returncode}"
         )
-        paginator = pag.EmbedPaginator(max_lines=25, prefix="```diff", suffix="```")
+        paginator = EmbedPaginator(max_lines=25, prefix="```diff", suffix="```")
+
+        # noinspection PyProtectedMember
+        paginator.total_pages = math.ceil(len(desc.splitlines()) / paginator._max_lines)
 
         @paginator.embed_factory()
         def make_embed(index, content):
             return hikari.Embed(
                 title=f"Executed in {diff.total_seconds() * 1000:.2f}ms",
                 color=0x58EF92 if success else 0xE74C3C,
-                description=f"`Page #{index + 1}` \nResult: {content}",
+                description=f"Result: {content}",
                 timestamp=datetime.now(tz=timezone.utc),
             ).set_footer(
-                text=f"Requested by {context.message.author.username}",
+                text=f"#{index + 1}/{paginator.total_pages}, Requested by {context.message.author.username}",
                 icon=context.message.author.avatar,
             )
 
@@ -79,8 +87,8 @@ class SuperUser(plugins.Plugin):
 
     async def evaluate(self, context: Context, body):
         """
-        Honestly I don't even know who made this method 😭 but I'm guessing its neko @nekoka#8788 correct me in discord?
-        Update: According to dav neko made it
+        Highly inspired from
+        @nekoka#8788's work
         """
         start = datetime.now(tz=timezone.utc)
         pattern = re.compile(r"```(?P<syntax>.*)\n(?P<body>[^`]+?)```")
@@ -131,17 +139,20 @@ class SuperUser(plugins.Plugin):
             f"*** Python {platform.python_version()} - Hikari {hikari.__version__} - lightbulb {lightbulb.__version__}\n"
             f"{lines}"
         )
-        paginator = pag.EmbedPaginator(max_lines=25, prefix="```diff", suffix="```")
+        paginator = EmbedPaginator(max_lines=25, prefix="```diff", suffix="```")
+
+        # noinspection PyProtectedMember
+        paginator.total_pages = math.ceil(len(desc.splitlines()) / paginator._max_lines)
 
         @paginator.embed_factory()
         def make_embed(index, content):
             return hikari.Embed(
                 title=f"Executed in {(datetime.now(tz=timezone.utc) - start).total_seconds() * 1000:.2f}ms",
                 color=0x58EF92 if success else 0xE74C3C,
-                description=f"`Page #{index + 1}` \nResult: {content}",
+                description=f"Result: {content}",
                 timestamp=datetime.now(tz=timezone.utc),
             ).set_footer(
-                text=f"Requested by {context.message.author.username}",
+                text=f"#{index + 1}/{paginator.total_pages}, Requested by {context.message.author.username}",
                 icon=context.message.author.avatar,
             )
 
@@ -206,6 +217,40 @@ class SuperUser(plugins.Plugin):
         except asyncio.TimeoutError:
             pass
         self.bot.rest.create_message = self.bot.send
+
+    @checks.owner_only()
+    @commands.command()
+    async def source(self, context: Context, command: str):
+        cmd = self.bot.get_command(command)
+        if not cmd:
+            return await context.reply("No such command.")
+        # noinspection PyProtectedMember
+        cmd = inspect.getsource(cmd._callback)
+        cmd = "\n".join(
+            [line[4:] if line.startswith("   ") else line for line in cmd.splitlines()]
+        )
+
+        paginator = EmbedPaginator(max_lines=25)
+
+        # noinspection PyProtectedMember
+        paginator.total_pages = math.ceil(len(cmd.splitlines()) / paginator._max_lines)
+
+        @paginator.embed_factory()
+        def make_embed(index, content):
+            return hikari.Embed(
+                title=f"{command}'s source",
+                colour=randint(0, 0xFFFFFF),
+                description=f"```py\n# Python {sys.version}\n{content}```",
+                timestamp=datetime.now(timezone.utc),
+            ).set_footer(
+                text=f"#{index + 1}/{paginator.total_pages}, Requested by {context.author.username}",
+                icon=context.author.avatar,
+            )
+
+        for line in cmd.splitlines():
+            paginator.add_line(line.replace("`", "´"))
+        navigator = nav.EmbedNavigator(paginator.pages)
+        await navigator.run(context=context)
 
 
 def load(bot):

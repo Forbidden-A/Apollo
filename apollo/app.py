@@ -41,7 +41,7 @@ def main():
     dir_path = os.path.dirname(os.path.realpath(__file__))
     os.chdir(dir_path)
     if token := os.getenv("APOLLO_TOKEN"):
-        bot = Bot(prefix=["a*",], token=token, insensitive_commands=True)
+        bot = Bot(prefix=["y.", "a*"], token=token, insensitive_commands=True)
         bot.load_extensions()
         bot.run()
     else:
